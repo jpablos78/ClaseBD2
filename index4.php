@@ -64,6 +64,8 @@ $records = json_decode($result);
 
 echo $records->message;
 
+echo 'cambio';
+
 //var_dump(json_decode($result));
 //
 //foreach ($records as $record) {
