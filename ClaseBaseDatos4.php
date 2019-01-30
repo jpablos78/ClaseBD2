@@ -39,9 +39,9 @@ class ClaseBaseDatos4 {
         if ($this->mssql) {
             $this->autocommit($this->parametros['autocommit']);
 
-            $result = ClaseJson2::getJson(array(
-                        "success" => 'true',
-                        "message" => utf8_encode("Conexión Exitosa"))
+            $result = array(
+                "success" => true,
+                "message" => utf8_encode("Conexión Exitosa")
             );
         } else {
             $result = $this->getError();
@@ -68,15 +68,14 @@ class ClaseBaseDatos4 {
     }
 
     public function query($query, $parametros = '') {
-        print_r($this->parametros);
+        //print_r($this->parametros);
 
         if (is_array($parametros)) {
             $this->setParametros($parametros);
         }
 
-        echo '<br>';
-
-        print_r($this->parametros);
+        //echo '<br>';
+        //print_r($this->parametros);
 
         if ($this->parametros['connect']) {
             $result = $this->conectarse();
@@ -98,7 +97,7 @@ class ClaseBaseDatos4 {
                 }
 
                 $result = array(
-                    "success" => 'true',
+                    "success" => true,
                     "ok" => $ok,
                     "message" => $mensaje,
                     "data" => $registros
@@ -125,7 +124,7 @@ class ClaseBaseDatos4 {
 
     private function getError() {
         return array(
-            "success" => 'false',
+            "success" => false,
             "message" => utf8_encode(odbc_error() . ' - ' . odbc_errormsg())
         );
     }
