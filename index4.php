@@ -2,7 +2,8 @@
 
 include_once 'config.inc.php';
 include_once 'ClaseBaseDatos4.php';
-
+error_reporting(E_ALL);
+echo '<hr>1._Conexion manual, se necesita instanciar a la clase<hr>';
 //1._Conexion manual, se necesita instanciar a la clase
 $objetoBaseDatos = new ClaseBaseDatos4();
 //se deben definir los parametros
@@ -62,9 +63,39 @@ $result = $objetoBaseDatos->conectarse();
 
 $records = json_decode($result);
 
-echo $records->message;
+if (!$records->success) {
+    echo $result;
+} else {
+    //echo $records->message;
+    //echo 'cambio';
+    $query = "SELECT TOP 100 us_login, us_nombres
+              FROM wp_usuarios ";
 
-echo 'cambio';
+    $result = $objetoBaseDatos->query($query);
+
+    $records = json_decode($result);
+
+    if (!$records->success) {
+        echo $result;
+    } else {
+        echo $result;
+        echo '<br>';
+
+        //recorrer la data
+        foreach ($records->data as $record) {
+            echo $record->us_login . '<br>';
+            echo $record->us_nombres . '<br>';
+            echo '<hr>';
+        }
+    }
+
+    $objetoBaseDatos->desconectarse();
+}
+
+echo '<hr>3._Conexion automatica<hr>';
+
+$query = "SELECT TOP 100 us_login, us_nombres
+          FROM wp_usuarios ";
 
 //var_dump(json_decode($result));
 //
