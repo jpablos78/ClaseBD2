@@ -30,10 +30,20 @@ class ClaseBaseDatos4 {
     );
 
     public function conectarse() {
-        $this->servidor = _SERVIDOR;
-        $this->base = _BASE;
-        $this->usuario = _USUARIO;
-        $this->clave = _CLAVE;
+        switch ($this->parametros['interfaz']) {
+            case '':
+                $this->servidor = _SERVIDOR;
+                $this->base = _BASE;
+                $this->usuario = _USUARIO;
+                $this->clave = _CLAVE;
+                break;
+            case 'I':
+                $this->servidor = _SERVIDOR_I;
+                $this->base = _BASE_I;
+                $this->usuario = _USUARIO_I;
+                $this->clave = _CLAVE_I;
+                break;
+        }
 
         $this->mssql = odbc_connect("Driver={SQL Server};Server=" . $this->servidor . ";Database=" . $this->base . ";", $this->usuario, $this->clave);
 
@@ -79,20 +89,21 @@ class ClaseBaseDatos4 {
         //print_r($this->parametros);
 
         if ($this->parametros['connect']) {
-            $result = $this->conectarse();
+            $result = $this->conectarse();           
         }
 
         if ($this->parametros['debug']) {
             echo '<hr>' . $query . '<hr>';
         }
-
-        if ($this->mssql) {
+        
+        if ($this->mssql) {            
             $resp = odbc_exec($this->mssql, $query);
-
+            print_r($resp);
             $mensaje = '';
             $ok = '';
 
             if (!odbc_error()) {
+                echo 'no erroe';
                 if ($this->parametros['autocommit']) {
                     $this->commit();
                 }
@@ -109,6 +120,7 @@ class ClaseBaseDatos4 {
                     "data" => $registros
                 );
             } else {
+                echo 'hubo error';
                 $result = $this->getError();
 
                 if ($this->parametros['autocommit']) {
@@ -135,7 +147,7 @@ class ClaseBaseDatos4 {
         );
     }
 
-    private function autocommit($autocommit = false) {
+    public function autocommit($autocommit = false) {
         odbc_autocommit($this->mssql, $autocommit);
     }
 
