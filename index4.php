@@ -9,6 +9,7 @@ $objetoBaseDatos = new ClaseBaseDatos4();
 //se deben definir los parametros
 $parametros = array(
     'connect' => false,
+    'disconnect' => false,
     'json' => false
 );
 //setear los parametros
@@ -54,6 +55,7 @@ $objetoBaseDatos = new ClaseBaseDatos4();
 //se deben definir los parametros
 $parametros = array(
     'connect' => false,
+    'disconnect' => false,
     'json' => true
 );
 
@@ -92,10 +94,195 @@ if (!$records->success) {
     $objetoBaseDatos->desconectarse();
 }
 
-echo '<hr>3._Conexion automatica<hr>';
+echo '<hr>3._Conexion automatica, retorna json<hr>';
+
+$objetoBaseDatos = new ClaseBaseDatos4();
 
 $query = "SELECT TOP 100 us_login, us_nombres
           FROM wp_usuarios ";
+
+$result = $objetoBaseDatos->query($query);
+
+echo $result;
+
+
+echo '<hr>4._Conexion automatica, retorna array<hr>';
+
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'json' => false
+);
+
+$query = "SELECT TOP 100 us_login, us_nombres
+          FROM wp_usuarios ";
+
+$result = $objetoBaseDatos->query($query, $parametros);
+
+print_r($result);
+
+echo '<hr>5._Presentar query<hr>';
+
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true
+);
+
+$query = "SELECT TOP 100 us_login, us_nombres
+          FROM wp_usuarios ";
+
+$result = $objetoBaseDatos->query($query, $parametros);
+
+echo $result;
+
+
+echo '<hr>5._2 o mas querys en una conexion<hr>';
+
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true,
+    'disconnect' => false
+);
+//se lo puede setear asi tambien, y no es necesario pasarlo como parametro en
+//el metodo $objetoBaseDatos->query
+//$objetoBaseDatos->setParametros($parametros);
+
+
+$query = "SELECT TOP 100 us_login, us_nombres
+          FROM wp_usuarios ";
+
+$result = $objetoBaseDatos->query($query, $parametros);
+
+$records = json_decode($result);
+
+if (!$records->success) {
+    echo $result;
+} else {
+    $query2 = "select pe_codigo, pe_desc
+               from wp_perfil";
+
+    $result2 = $objetoBaseDatos->query($query2, $parametros);
+
+    $records2 = json_decode($result2);
+
+    if (!$records2->success) {
+        echo $result2;
+    } else {
+        echo $result . '<br>';
+        echo $result2 . '<br>';
+    }
+}
+
+
+$objetoBaseDatos->desconectarse();
+
+echo '<hr>6._call store procedure<hr>';
+
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true,
+    'disconnect' => false
+);
+
+$query = "
+    exec P_WP_CONSULTA_STOCK_ITEMS
+    @CCI_ITEM = '3900600002',
+    @OPERACION = 'PCP'";
+
+$result = $objetoBaseDatos->query($query);
+
+echo $result;
+
+echo '<hr>7._manejo de transacciones una sola transaccion autocommit<hr>';
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true,
+    'autocommit' => true
+);
+
+$objetoBaseDatos->setParametros($parametros);
+
+$query = "
+    update wp_pedido_detalle
+    set ces_nuevo_item = 'Z'
+    where cci_item = '4601300060'
+";
+
+$result = $objetoBaseDatos->query($query);
+
+echo $result;
+
+echo '<hr>7._manejo de transacciones una sola transaccion commit manual<hr>';
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true,
+    'autocommit' => false,
+    'disconnect' => false
+);
+
+$objetoBaseDatos->setParametros($parametros);
+
+$query = "
+    update wp_pedido_detalle
+    set ces_nuevo_item = 'W'
+    where cci_item = '4601300060'
+";
+
+$result = $objetoBaseDatos->query($query);
+
+$records = json_decode($result);
+
+if (!$records->success) {
+    echo $result;
+    $objetoBaseDatos->rollback();
+} else {
+    $objetoBaseDatos->commit();
+    echo $result . '<br>';
+}
+
+$objetoBaseDatos->desconectarse();
+
+echo $result;
+
+echo '<hr>8._manejo de transacciones varias transacciones se usa commit manual<hr>';
+$objetoBaseDatos = new ClaseBaseDatos4();
+
+$parametros = array(
+    'debug' => true,
+    'autocommit' => false,
+    'disconnect' => false
+);
+
+$objetoBaseDatos->setParametros($parametros);
+
+$query = "
+    update wp_pedido_detalle
+    set ces_nuevo_item = 'L'
+    where cci_item = '4601300060'
+";
+
+$result = $objetoBaseDatos->query($query);
+
+$records = json_decode($result);
+
+$error = '';
+
+if (!$records->success) {
+    
+}
+
+//if (!$records->success) {
+//    echo $result;
+//    $objetoBaseDatos->rollback();
+//} else {
+//    $objetoBaseDatos->commit();
+//    echo $result . '<br>';
+//}
 
 //var_dump(json_decode($result));
 //

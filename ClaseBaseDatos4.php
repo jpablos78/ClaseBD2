@@ -21,6 +21,7 @@ class ClaseBaseDatos4 {
     private $autocommit;
     private $parametros = array(
         'connect' => true,
+        'disconnect' => true,
         'interfaz' => '',
         'autocommit' => false,
         'json' => true,
@@ -81,6 +82,10 @@ class ClaseBaseDatos4 {
             $result = $this->conectarse();
         }
 
+        if ($this->parametros['debug']) {
+            echo '<hr>' . $query . '<hr>';
+        }
+
         if ($this->mssql) {
             $resp = odbc_exec($this->mssql, $query);
 
@@ -92,6 +97,7 @@ class ClaseBaseDatos4 {
                     $this->commit();
                 }
 
+                $registros = array();
                 while ($row = odbc_fetch_array($resp)) {
                     $registros[] = array_map('utf8_encode', $row);
                 }
@@ -114,7 +120,7 @@ class ClaseBaseDatos4 {
                 $result = ClaseJson2::getJson($result);
             }
 
-            if ($this->parametros['connect']) {
+            if ($this->parametros['disconnect']) {
                 $this->desconectarse();
             }
         }
@@ -133,17 +139,21 @@ class ClaseBaseDatos4 {
         odbc_autocommit($this->mssql, $autocommit);
     }
 
-    private function commit() {
+    public function commit() {
         odbc_commit($this->mssql);
     }
 
-    private function rollback() {
+    public function rollback() {
         odbc_rollback($this->mssql);
     }
 
     public function setParametros($parametros) {
         if (array_key_exists('connect', $parametros)) {
             $this->parametros['connect'] = $parametros['connect'];
+        }
+
+        if (array_key_exists('disconnect', $parametros)) {
+            $this->parametros['disconnect'] = $parametros['disconnect'];
         }
 
         if (array_key_exists('interfaz', $parametros)) {
