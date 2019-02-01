@@ -34,7 +34,7 @@ $conn = odbc_connect("Driver={SQL Server};Server=$servidor;Database=$base;", $us
 if ($conn) {
     echo 'conectado<br>';
 
-    $query = 'SELECT top 10 cci_empresar, cci_sucursal FROM BIZ_GEN..TB_GEN_CLIPROV ';
+    $query = 'SELECT top 10 cci_empresa, cci_sucursal FROM BIZ_GEN..TB_GEN_CLIPROV ';
 
     $result = odbc_exec($conn, $query);
 

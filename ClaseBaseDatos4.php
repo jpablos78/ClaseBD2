@@ -29,6 +29,11 @@ class ClaseBaseDatos4 {
         'verificarPermisos' => true
     );
 
+    function __construct() {
+        echo 'en constructor';
+        $this->mssql = null;
+    }
+
     public function conectarse() {
         switch ($this->parametros['interfaz']) {
             case '':
@@ -89,20 +94,27 @@ class ClaseBaseDatos4 {
         //print_r($this->parametros);
 
         if ($this->parametros['connect']) {
-            $result = $this->conectarse();           
+            $result = $this->conectarse();
         }
 
         if ($this->parametros['debug']) {
             echo '<hr>' . $query . '<hr>';
         }
-        
-        if ($this->mssql) {            
+
+        if ($this->mssql) {
             $resp = odbc_exec($this->mssql, $query);
-            print_r($resp);
+            //echo $query;
+            //print_r($resp);
             $mensaje = '';
             $ok = '';
 
-            if (!odbc_error()) {
+            //if ($resp) {
+            //    echo 'no hay errores';
+            //} else {
+            //    echo 'error';
+            //}
+            //if (!odbc_error($this->mssql)) {
+            if ($resp) {
                 echo 'no erroe';
                 if ($this->parametros['autocommit']) {
                     $this->commit();
@@ -120,7 +132,7 @@ class ClaseBaseDatos4 {
                     "data" => $registros
                 );
             } else {
-                echo 'hubo error';
+                echo 'hubo error<br>';
                 $result = $this->getError();
 
                 if ($this->parametros['autocommit']) {
@@ -143,7 +155,7 @@ class ClaseBaseDatos4 {
     private function getError() {
         return array(
             "success" => false,
-            "message" => utf8_encode(odbc_error() . ' - ' . odbc_errormsg())
+            "message" => utf8_encode(odbc_error($this->mssql) . ' - ' . odbc_errormsg($this->mssql))
         );
     }
 
