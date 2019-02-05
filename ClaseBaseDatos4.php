@@ -2,7 +2,8 @@
 
 include_once 'ClaseJson2.php';
 
-error_reporting(E_ERROR | E_PARSE);
+//error_reporting(E_ERROR | E_PARSE);
+error_reporting(E_ALL ^ E_WARNING);
 date_default_timezone_set("America/Guayaquil");
 
 /**
@@ -26,7 +27,7 @@ class ClaseBaseDatos4 {
         'autocommit' => false,
         'json' => true,
         'debug' => false,
-        'verificarPermisos' => true
+        'verificarPermisos' => false
     );
 
     function __construct() {
@@ -102,61 +103,72 @@ class ClaseBaseDatos4 {
         }
 
         if ($this->mssql) {
-            $resp = odbc_exec($this->mssql, $query);
-            //echo $query;
-            //print_r($resp);
-            $mensaje = '';
-            $ok = '';
+            $continuar = $this->verificarPermisos();
 
-            //if ($resp) {
-            //    echo 'no hay errores';
-            //} else {
-            //    echo 'error';
-            //}
-            //if (!odbc_error($this->mssql)) {
-            if ($resp) {
-                echo 'no erroe';
-                if ($this->parametros['autocommit']) {
-                    $this->commit();
+            if ($continuar) {
+                $resp = odbc_exec($this->mssql, $query);
+                //echo $query;
+                //print_r($resp);
+                $mensaje = '';
+                $ok = '';
+
+                //if ($resp) {
+                //    echo 'no hay errores';
+                //} else {
+                //    echo 'error';
+                //}
+                //if (!odbc_error($this->mssql)) {
+                if ($resp) {
+                    echo 'no erroe';
+                    if ($this->parametros['autocommit']) {
+                        $this->commit();
+                    }
+
+                    $registros = array();
+                    while ($row = odbc_fetch_array($resp)) {
+                        $registros[] = array_map('utf8_encode', $row);
+                    }
+
+                    $result = array(
+                        "success" => true,
+                        "ok" => $ok,
+                        "message" => $mensaje,
+                        "data" => $registros
+                    );
+                } else {
+                    echo 'hubo error<br>';
+                    $result = $this->getError();
+
+                    if ($this->parametros['autocommit']) {
+                        $this->rollback();
+                    }
                 }
 
-                $registros = array();
-                while ($row = odbc_fetch_array($resp)) {
-                    $registros[] = array_map('utf8_encode', $row);
+                if ($this->parametros['json']) {
+                    $result = ClaseJson2::getJson($result);
                 }
 
-                $result = array(
-                    "success" => true,
-                    "ok" => $ok,
-                    "message" => $mensaje,
-                    "data" => $registros
-                );
-            } else {
-                echo 'hubo error<br>';
-                $result = $this->getError();
-
-                if ($this->parametros['autocommit']) {
-                    $this->rollback();
+                if ($this->parametros['disconnect']) {
+                    $this->desconectarse();
                 }
             }
 
-            if ($this->parametros['json']) {
-                $result = ClaseJson2::getJson($result);
-            }
-
-            if ($this->parametros['disconnect']) {
-                $this->desconectarse();
-            }
+            return $result;
         }
-
-        return $result;
     }
 
     private function getError() {
-        return array(
-            "success" => false,
-            "message" => utf8_encode(odbc_error($this->mssql) . ' - ' . odbc_errormsg($this->mssql))
-        );
+        if (!$this->mssql) {
+            return array(
+                "success" => false,
+                "message" => utf8_encode(odbc_error() . ' - ' . odbc_errormsg())
+            );
+        } else {
+            return array(
+                "success" => false,
+                "message" => utf8_encode(odbc_error($this->mssql) . ' - ' . odbc_errormsg($this->mssql))
+            );
+        }
     }
 
     public function autocommit($autocommit = false) {
@@ -198,6 +210,15 @@ class ClaseBaseDatos4 {
 
         if (array_key_exists('verificarPermisos', $parametros)) {
             $this->parametros['verificarPermisos'] = $parametros['verificarPermisos'];
+        }
+    }
+
+    private function verificarPermisos() {
+        if ($this->parametros['verificarPermisos']) {
+            //verificar los permisos
+            return false;
+        } else {
+            return true;
         }
     }
 

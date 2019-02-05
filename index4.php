@@ -8,7 +8,7 @@ include_once 'config.inc.php';
 include_once 'ClaseBaseDatos4.php';
 
 //error_reporting(E_ALL);
-error_reporting(E_ALL ^ E_WARNING);
+//error_reporting(E_ALL ^ E_WARNING);
 
 echo '<hr>1._Conexion manual, se necesita instanciar a la clase<hr>';
 //1._Conexion manual, se necesita instanciar a la clase
@@ -314,41 +314,42 @@ if ($error == 'S') {
 
 $objetoBaseDatos->desconectarse();
 
-//echo '<hr>9._uso mas de un servidor de conexion(DEBE DEFINIRSE EN EL ARCHIVO DE CONFIGURACIONES Y EN LA CLASE DE BASE DE DATOS LOS SERVIDORES A USARSE)<hr>';
-//$result = '';
-//$result2 = '';
-//$records = '';
-//$records2 = '';
-//
-//echo $result;
-//
-//$objetoBaseDatos = new ClaseBaseDatos4();
-//$objetoBaseDatosInterfaz = new ClaseBaseDatos4();
-//
-//$parametrosInterfaz = array(
-//    'interfaz' => 'I'
-//);
-//
-//$objetoBaseDatosInterfaz->setParametros($parametrosInterfaz);
-//
-//$query = "select pe_codigo, pe_desc
-//               from wp_perfil";
-//
-//$result = $objetoBaseDatos->query($query);
-//
-//echo $result;
-//
-//$records = json_decode($result);
-//
-//if (!$records->success) {
-//    echo $result;
-//} else {
-//    $queryI = "select top 10 cci_cliente, cno_cliprov biz_fac..tb_fac_factura where cci_empresa = '009'";
-//
-//    $resultInterfaz = $objetoBaseDatosInterfaz->query($queryI);
-//
-//    print_r($resultInterfaz);
-//}
+echo '<hr>9._uso mas de un servidor de conexion(DEBE DEFINIRSE EN EL ARCHIVO DE CONFIGURACIONES Y EN LA CLASE DE BASE DE DATOS LOS SERVIDORES A USARSE)<hr>';
+$result = '';
+$result2 = '';
+$records = '';
+$records2 = '';
+
+echo $result;
+
+$objetoBaseDatos = new ClaseBaseDatos4();
+$objetoBaseDatosInterfaz = new ClaseBaseDatos4();
+
+$parametrosInterfaz = array(
+    'interfaz' => 'I',
+    'debug' => true
+);
+
+$objetoBaseDatosInterfaz->setParametros($parametrosInterfaz);
+
+$query = "select pe_codigo, pe_desc
+               from wp_perfil";
+
+$result = $objetoBaseDatos->query($query);
+
+echo $result;
+
+$records = json_decode($result);
+
+if (!$records->success) {
+    echo $result;
+} else {
+    $queryI = "select top 10 cci_cliente, cno_cliente from biz_fac..tb_fac_factura where cci_empresa = '009'";
+
+    $resultInterfaz = $objetoBaseDatosInterfaz->query($queryI);
+
+    print_r($resultInterfaz);
+}
 
 
 //echo $result;
